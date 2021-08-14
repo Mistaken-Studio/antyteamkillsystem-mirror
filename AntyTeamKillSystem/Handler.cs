@@ -15,7 +15,7 @@ using Mistaken.RoundLogger;
 
 namespace Mistaken.AntyTeamKillSystem
 {
-    internal partial class Handler : Module
+    internal class Handler : Module
     {
         public static readonly (Team Attacker, Team Victim)[] TeamKillTeams = new (Team, Team)[]
         {
