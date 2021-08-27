@@ -6,8 +6,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Grenades;
 using Mistaken.API;
 using Mistaken.API.Diagnostics;
 using Mistaken.API.Extensions;
@@ -90,7 +90,7 @@ namespace Mistaken.AntyTeamKillSystem
                 teamKill.Victim.Broadcast(5, PluginHandler.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()));
             }
 
-            Instance.PunishPlayer(teamKill.Attacker, teamKill.HitInformation.GetDamageType() == DamageTypes.Grenade);
+            Instance.PunishPlayer(teamKill.Attacker, teamKill.HitInformation.Tool == DamageTypes.Grenade);
             PluginHandler.InvokeOnTeamKill(teamKill);
         }
 
@@ -129,8 +129,16 @@ namespace Mistaken.AntyTeamKillSystem
 
         private void Player_Destroying(Exiled.Events.EventArgs.DestroyingEventArgs ev)
         {
-            if (!Round.IsStarted)
+            try
+            {
+                if (!Round.IsStarted)
+                    return;
+            }
+            catch
+            {
                 return;
+            }
+
             this.leftPlayers[ev.Player.UserId] = ev.Player;
             this.leftPlayersIPs[ev.Player.UserId] = ev.Player.IPAddress;
         }
@@ -162,9 +170,9 @@ namespace Mistaken.AntyTeamKillSystem
             var throwerTeam = ev.Thrower?.Team ?? Team.RIP;
             if (ev.Thrower == null || ev.Thrower == Server.Host)
             {
-                var grenade = ev.Grenade.GetComponent<FragGrenade>();
-                throwerTeam = grenade.TeamWhenThrown;
-                if (grenade._throwerName == "(UNKNOWN)")
+                var grenade = ev.Grenade.GetComponent<InventorySystem.Items.ThrowableProjectiles.ExplosionGrenade>();
+                throwerTeam = grenade.PreviousOwner.Role.GetTeam();
+                if (!grenade.PreviousOwner.IsSet)
                 {
                     RLogger.Log("Anty TeamKill System", "SKIP GRENADE", $"Skip Code: 3.6 | Thrown by null");
                     return; // Skip Code: 3.6
@@ -172,12 +180,12 @@ namespace Mistaken.AntyTeamKillSystem
 
                 try
                 {
-                    throwerUserId = grenade._throwerName.Split('(')[1].Split(')')[0];
+                    throwerUserId = grenade.PreviousOwner.LoggedHubName.Split('(')[1].Split(')')[0];
                 }
                 catch (System.Exception ex)
                 {
                     this.Log.Error("Error Code: 3.9");
-                    this.Log.Error(grenade._throwerName);
+                    this.Log.Error(grenade.PreviousOwner.LoggedHubName);
                     this.Log.Error(ex.Message);
                     this.Log.Error(ex.StackTrace);
                 }
@@ -196,7 +204,7 @@ namespace Mistaken.AntyTeamKillSystem
             }
 
             HashSet<Player> friendlies = new HashSet<Player>();
-            var targets = ev.TargetToDamages.Keys.ToArray();
+            var targets = ev.TargetsToAffect.ToArray();
             foreach (var target in targets)
             {
                 this.grenadeAttacks[target] = (thrower, throwerUserId, throwerTeam);
@@ -280,7 +288,7 @@ namespace Mistaken.AntyTeamKillSystem
                 // ExecuteCode: 2.3
                 TeamAttack.Create(ev, "2.3", attackerInfo.Team);
             }
-            else if (ev.HitInformations.GetDamageType() == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
+            else if (ev.HitInformation.Tool == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {
@@ -328,7 +336,7 @@ namespace Mistaken.AntyTeamKillSystem
                 // ExecuteCode: 1.3
                 TeamKill.Create(ev, "1.3", attackerInfo.Team);
             }
-            else if (ev.HitInformation.GetDamageType() == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
+            else if (ev.HitInformation.Tool == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {
@@ -421,13 +429,13 @@ namespace Mistaken.AntyTeamKillSystem
             });
         }
 
-        private void Ban(Player player, int duration, string message)
+        private void Ban(Player player, long duration, string message)
         {
             duration *= 60; // Change from minutes to seconds
 
             if (player.IsConnected)
             {
-                player.Ban(duration, message, "Anty TeamKill System");
+                player.Ban((int)duration, message, "Anty TeamKill System");
             }
             else
             {
