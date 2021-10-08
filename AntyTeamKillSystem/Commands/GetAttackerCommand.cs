@@ -45,7 +45,7 @@ namespace Mistaken.AntyTeamKillSystem.Commands
                         $"Attacker: ({teamAttack.Attacker.Id}) {teamAttack.Attacker.Nickname} ({teamAttack.AttackerTeam})",
                         $"Attacker UserId: {teamAttack.Attacker.UserId}",
                         $"Damage: {teamAttack.HitInformation.Amount}",
-                        $"Tool: {teamAttack.HitInformation.GetDamageName()}",
+                        $"Tool: {teamAttack.HitInformation.Tool.Name}",
                         $"Code: {teamAttack.DetectionCode}",
                         $"RoundsAgo: {RoundPlus.RoundId - teamAttack.RoundId}",
                     }));
@@ -59,7 +59,7 @@ namespace Mistaken.AntyTeamKillSystem.Commands
                         "TeamKill",
                         $"Attacker: ({teamKill.Attacker.Id}) {teamKill.Attacker.Nickname} ({teamKill.AttackerTeam})",
                         $"Attacker UserId: {teamKill.Attacker.UserId}",
-                        $"Tool: {teamKill.HitInformation.GetDamageName()}",
+                        $"Tool: {teamKill.HitInformation.Tool.Name}",
                         $"Code: {teamKill.DetectionCode}",
                         $"RoundsAgo: {RoundPlus.RoundId - teamKill.RoundId}",
                     }));
