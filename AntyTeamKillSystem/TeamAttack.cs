@@ -4,6 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Exiled.API.Features;
@@ -31,7 +32,7 @@ namespace Mistaken.AntyTeamKillSystem
         /// <param name="attacker">Attacker if diffrent from <paramref name="ev"/>'s <see cref="Exiled.Events.EventArgs.HurtingEventArgs.Attacker"/>.</param>
         /// <returns>New <see cref="TeamAttack"/> instance.</returns>
         public static TeamAttack? Create(Exiled.Events.EventArgs.HurtingEventArgs ev, string code, Team? attackerTeam = null, Player attacker = null)
-            => Create(attacker ?? ev.Attacker, ev.Target, ev.HitInformations, code, attackerTeam);
+            => Create(attacker ?? ev.Attacker, ev.Target, ev.HitInformation, code, attackerTeam);
 
         /// <summary>
         /// Creates new <see cref="TeamAttack"/>.
@@ -44,8 +45,16 @@ namespace Mistaken.AntyTeamKillSystem
         /// <returns>New <see cref="TeamAttack"/> instance.</returns>
         public static TeamAttack? Create(Player attacker, Player target, PlayerStats.HitInfo hitInfo, string code, Team? attackerTeam = null)
         {
-            if (!Round.IsStarted)
+            try
+            {
+                if (!Round.IsStarted)
+                    return null;
+            }
+            catch
+            {
                 return null;
+            }
+
             int roundId = RoundPlus.RoundId;
             var teamAttack = new TeamAttack
             {
@@ -56,6 +65,7 @@ namespace Mistaken.AntyTeamKillSystem
                 DetectionCode = code,
                 HitInformation = hitInfo,
                 RoundId = roundId,
+                Timestamp = DateTime.Now,
             };
             if (!TeamAttacks.ContainsKey(roundId))
                 TeamAttacks[roundId] = new List<TeamAttack>();
@@ -99,6 +109,11 @@ namespace Mistaken.AntyTeamKillSystem
         /// </summary>
         public PlayerStats.HitInfo HitInformation;
 
+        /// <summary>
+        /// Time when TeamAttack happend.
+        /// </summary>
+        public DateTime Timestamp;
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -107,7 +122,7 @@ namespace Mistaken.AntyTeamKillSystem
                 .Replace("{AttackerTeam}", this.AttackerTeam.ToString())
                 .Replace("{Victim}", this.Victim.ToString(false))
                 .Replace("{VictimTeam}", this.VictimTeam.ToString())
-                .Replace("{Tool}", this.HitInformation.GetDamageName())
+                .Replace("{Tool}", this.HitInformation.Tool.Name)
                 .Replace("{Amount}", this.HitInformation.Amount.ToString())
                 .Replace("{DetectionCode}", this.DetectionCode)
                 ;
