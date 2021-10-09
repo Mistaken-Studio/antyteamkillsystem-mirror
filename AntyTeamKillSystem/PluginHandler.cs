@@ -43,8 +43,6 @@ namespace Mistaken.AntyTeamKillSystem
         {
             Instance = this;
 
-            // new AntyTeamKillHandler(this);
-            // new MassTKDetectionHandler(this);
             new Handler(this);
 
             API.Diagnostics.Module.OnEnable(this);
