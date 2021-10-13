@@ -276,6 +276,18 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 2.0
             }
 
+            if (ev.Target.IsGodModeEnabled)
+            {
+                this.Log.Debug("Skip Code: 2.6", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 2.6
+            }
+
+            if (ev.Attacker == Server.Host)
+            {
+                this.Log.Debug("Skip Code: 2.7", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 2.7
+            }
+
             if (IsTeamKill(ev.Attacker, ev.Target))
             {
                 // TeamAttack
@@ -322,6 +334,12 @@ namespace Mistaken.AntyTeamKillSystem
             {
                 this.Log.Debug("Skip Code: 1.0", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // SkipCode: 1.0
+            }
+
+            if (ev.Killer == Server.Host)
+            {
+                this.Log.Debug("Skip Code: 1.7", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 1.7
             }
 
             if (IsTeamKill(ev.Killer, ev.Target))
