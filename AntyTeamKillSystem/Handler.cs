@@ -159,7 +159,7 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // Skip Code: 3.4
             }
 
-            if (!ev.IsFrag)
+            if (ev.GrenadeType != Exiled.API.Enums.GrenadeType.FragGrenade)
             {
                 this.Log.Debug("Skip Code: 3.5", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // Skip Code: 3.5
