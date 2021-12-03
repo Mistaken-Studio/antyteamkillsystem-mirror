@@ -62,7 +62,7 @@
     <Compile Include="TeamKill.cs" />
     <Compile Include="Translation.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Handler.cs" />
+    <Compile Include="AntyTeamkillHandler.cs" />
     <Compile Include="PluginHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

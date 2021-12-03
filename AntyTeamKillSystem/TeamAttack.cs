@@ -32,18 +32,18 @@ namespace Mistaken.AntyTeamKillSystem
         /// <param name="attacker">Attacker if diffrent from <paramref name="ev"/>'s <see cref="Exiled.Events.EventArgs.HurtingEventArgs.Attacker"/>.</param>
         /// <returns>New <see cref="TeamAttack"/> instance.</returns>
         public static TeamAttack? Create(Exiled.Events.EventArgs.HurtingEventArgs ev, string code, Team? attackerTeam = null, Player attacker = null)
-            => Create(attacker ?? ev.Attacker, ev.Target, ev.HitInformation, code, attackerTeam);
+            => Create(attacker ?? ev.Attacker, ev.Target, ev.Handler, code, attackerTeam);
 
         /// <summary>
         /// Creates new <see cref="TeamAttack"/>.
         /// </summary>
         /// <param name="attacker"><inheritdoc cref="Attacker"/></param>
         /// <param name="target"><inheritdoc cref="Victim"/></param>
-        /// <param name="hitInfo"><inheritdoc cref="HitInformation"/></param>
+        /// <param name="handler"><inheritdoc cref="Handler"/></param>
         /// <param name="code"><inheritdoc cref="DetectionCode"/></param>
         /// <param name="attackerTeam">Attacker Team if diffrent from current.</param>
         /// <returns>New <see cref="TeamAttack"/> instance.</returns>
-        public static TeamAttack? Create(Player attacker, Player target, PlayerStats.HitInfo hitInfo, string code, Team? attackerTeam = null)
+        public static TeamAttack? Create(Player attacker, Player target, DamageHandler handler, string code, Team? attackerTeam = null)
         {
             try
             {
@@ -63,14 +63,14 @@ namespace Mistaken.AntyTeamKillSystem
                 VictimTeam = target.Team,
                 AttackerTeam = attackerTeam ?? attacker.Team,
                 DetectionCode = code,
-                HitInformation = hitInfo,
+                Handler = handler,
                 RoundId = roundId,
                 Timestamp = DateTime.Now,
             };
             if (!TeamAttacks.ContainsKey(roundId))
                 TeamAttacks[roundId] = new List<TeamAttack>();
             TeamAttacks[roundId].Add(teamAttack);
-            Handler.OnTeamAttack(teamAttack);
+            AntyTeamkillHandler.OnTeamAttack(teamAttack);
             return teamAttack;
         }
 
@@ -107,7 +107,7 @@ namespace Mistaken.AntyTeamKillSystem
         /// <summary>
         /// Information about hit.
         /// </summary>
-        public PlayerStats.HitInfo HitInformation;
+        public DamageHandler Handler;
 
         /// <summary>
         /// Time when TeamAttack happend.
@@ -122,8 +122,8 @@ namespace Mistaken.AntyTeamKillSystem
                 .Replace("{AttackerTeam}", this.AttackerTeam.ToString())
                 .Replace("{Victim}", this.Victim.ToString(false))
                 .Replace("{VictimTeam}", this.VictimTeam.ToString())
-                .Replace("{Tool}", this.HitInformation.Tool.Name)
-                .Replace("{Amount}", this.HitInformation.Amount.ToString())
+                .Replace("{Tool}", this.Handler.Type.ToString())
+                .Replace("{Amount}", this.Handler.Amount.ToString())
                 .Replace("{DetectionCode}", this.DetectionCode)
                 ;
         }
