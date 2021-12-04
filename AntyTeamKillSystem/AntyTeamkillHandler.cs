@@ -34,7 +34,7 @@ namespace Mistaken.AntyTeamKillSystem
         public static AntyTeamkillHandler Instance { get; private set; }
 
         public static bool IsTeamKill(Player attacker, Player victim, Team? attackerTeam = null)
-            => attacker != victim && IsTeamKill(attackerTeam ?? attacker.Team, victim.Team);
+            => attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Team, victim.Team);
 
         public static bool IsTeamKill(Team attackerTeam, Team victimTeam)
             => TeamKillTeams.Any(x => x.Attacker == attackerTeam && x.Victim == victimTeam);
@@ -288,6 +288,12 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 2.7
             }
 
+            if (ev.Attacker is null)
+            {
+                this.Log.Debug("Skip Code: 2.8", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 2.8
+            }
+
             if (IsTeamKill(ev.Attacker, ev.Target))
             {
                 // TeamAttack
@@ -340,6 +346,12 @@ namespace Mistaken.AntyTeamKillSystem
             {
                 this.Log.Debug("Skip Code: 1.7", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // SkipCode: 1.7
+            }
+
+            if (ev.Killer is null)
+            {
+                this.Log.Debug("Skip Code: 1.8", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 1.8
             }
 
             if (IsTeamKill(ev.Killer, ev.Target))
