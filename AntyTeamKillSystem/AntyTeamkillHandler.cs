@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="Handler.cs" company="Mistaken">
+// <copyright file="AntyTeamkillHandler.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -15,7 +15,7 @@ using Mistaken.RoundLogger;
 
 namespace Mistaken.AntyTeamKillSystem
 {
-    internal class Handler : Module
+    internal class AntyTeamkillHandler : Module
     {
         public static readonly (Team Attacker, Team Victim)[] TeamKillTeams = new (Team, Team)[]
         {
@@ -31,15 +31,15 @@ namespace Mistaken.AntyTeamKillSystem
 
         public static readonly Dictionary<Player, (Team Team, RoleType Role)> LastDead = new Dictionary<Player, (Team Team, RoleType Role)>();
 
-        public static Handler Instance { get; private set; }
+        public static AntyTeamkillHandler Instance { get; private set; }
 
         public static bool IsTeamKill(Player attacker, Player victim, Team? attackerTeam = null)
-            => attacker != victim && IsTeamKill(attackerTeam ?? attacker.Team, victim.Team);
+            => attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Team, victim.Team);
 
         public static bool IsTeamKill(Team attackerTeam, Team victimTeam)
             => TeamKillTeams.Any(x => x.Attacker == attackerTeam && x.Victim == victimTeam);
 
-        public Handler(PluginHandler p)
+        public AntyTeamkillHandler(PluginHandler p)
            : base(p)
         {
             Instance = this;
@@ -90,7 +90,7 @@ namespace Mistaken.AntyTeamKillSystem
                 teamKill.Victim.Broadcast(5, PluginHandler.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()));
             }
 
-            Instance.PunishPlayer(teamKill.Attacker, teamKill.HitInformation.Tool == DamageTypes.Grenade);
+            Instance.PunishPlayer(teamKill.Attacker, teamKill.Handler.Type == Exiled.API.Enums.DamageType.Explosion);
             PluginHandler.InvokeOnTeamKill(teamKill);
         }
 
@@ -288,6 +288,12 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 2.7
             }
 
+            if (ev.Attacker is null)
+            {
+                this.Log.Debug("Skip Code: 2.8", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 2.8
+            }
+
             if (IsTeamKill(ev.Attacker, ev.Target))
             {
                 // TeamAttack
@@ -300,7 +306,7 @@ namespace Mistaken.AntyTeamKillSystem
                 // ExecuteCode: 2.3
                 TeamAttack.Create(ev, "2.3", attackerInfo.Team);
             }
-            else if (ev.HitInformation.Tool == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
+            else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {
@@ -342,6 +348,12 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 1.7
             }
 
+            if (ev.Killer is null)
+            {
+                this.Log.Debug("Skip Code: 1.8", PluginHandler.Instance.Config.VerbouseOutput);
+                return; // SkipCode: 1.8
+            }
+
             if (IsTeamKill(ev.Killer, ev.Target))
             {
                 // TeamKill -> Punish Player
@@ -354,7 +366,7 @@ namespace Mistaken.AntyTeamKillSystem
                 // ExecuteCode: 1.3
                 TeamKill.Create(ev, "1.3", attackerInfo.Team);
             }
-            else if (ev.HitInformation.Tool == DamageTypes.Grenade && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
+            else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {

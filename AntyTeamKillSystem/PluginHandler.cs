@@ -36,7 +36,7 @@ namespace Mistaken.AntyTeamKillSystem
         public override PluginPriority Priority => PluginPriority.Low;
 
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new Version(3, 0, 3);
+        public override Version RequiredExiledVersion => new Version(4, 1, 2);
 
 #pragma warning disable SA1202 // Elements should be ordered by access
         private Version version;
@@ -58,7 +58,7 @@ namespace Mistaken.AntyTeamKillSystem
         {
             Instance = this;
 
-            new Handler(this);
+            new AntyTeamkillHandler(this);
 
             API.Diagnostics.Module.OnEnable(this);
 
