@@ -180,12 +180,12 @@ namespace Mistaken.AntyTeamKillSystem
 
                 try
                 {
-                    throwerUserId = grenade.PreviousOwner.LoggedHubName.Split('(')[1].Split(')')[0];
+                    throwerUserId = grenade.PreviousOwner.LogUserID;
                 }
                 catch (System.Exception ex)
                 {
                     this.Log.Error("Error Code: 3.9");
-                    this.Log.Error(grenade.PreviousOwner.LoggedHubName);
+                    this.Log.Error(grenade.PreviousOwner.Nickname);
                     this.Log.Error(ex.Message);
                     this.Log.Error(ex.StackTrace);
                 }
