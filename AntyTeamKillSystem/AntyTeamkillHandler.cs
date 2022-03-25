@@ -34,7 +34,7 @@ namespace Mistaken.AntyTeamKillSystem
         public static AntyTeamkillHandler Instance { get; private set; }
 
         public static bool IsTeamKill(Player attacker, Player victim, Team? attackerTeam = null)
-            => attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Team, victim.Team);
+            => attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Role.Team, victim.Role.Team);
 
         public static bool IsTeamKill(Team attackerTeam, Team victimTeam)
             => TeamKillTeams.Any(x => x.Attacker == attackerTeam && x.Victim == victimTeam);
@@ -167,7 +167,7 @@ namespace Mistaken.AntyTeamKillSystem
 
             var thrower = ev.Thrower;
             var throwerUserId = ev.Thrower?.UserId;
-            var throwerTeam = ev.Thrower?.Team ?? Team.RIP;
+            var throwerTeam = ev.Thrower?.Role.Team ?? Team.RIP;
             if (ev.Thrower == null || ev.Thrower == Server.Host)
             {
                 var grenade = ev.Grenade.GetComponent<InventorySystem.Items.ThrowableProjectiles.ExplosionGrenade>();
@@ -254,7 +254,7 @@ namespace Mistaken.AntyTeamKillSystem
                             continue;
                         }
 
-                        player.Role = playerInfo.Role;
+                        player.Role.Type = playerInfo.Role;
                     }
                 }
                 else
@@ -389,7 +389,7 @@ namespace Mistaken.AntyTeamKillSystem
 
             if (!LastDead.ContainsKey(ev.Target))
             {
-                LastDead.Add(ev.Target, (ev.Target.Team, ev.Target.Role));
+                LastDead.Add(ev.Target, (ev.Target.Role.Team, ev.Target.Role));
                 this.CallDelayed(10, () => LastDead.Remove(ev.Target), "RemoveLastDead");
             }
         }

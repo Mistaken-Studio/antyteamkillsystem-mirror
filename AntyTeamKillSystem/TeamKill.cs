@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Exiled.API.Features;
+using Exiled.API.Features.DamageHandlers;
 using Mistaken.API;
 using Mistaken.API.Extensions;
 
@@ -60,8 +61,8 @@ namespace Mistaken.AntyTeamKillSystem
             {
                 Attacker = attacker,
                 Victim = target,
-                VictimTeam = target.Team,
-                AttackerTeam = attackerTeam ?? attacker.Team,
+                VictimTeam = target.Role.Team,
+                AttackerTeam = attackerTeam ?? attacker.Role.Team,
                 DetectionCode = code,
                 Handler = handler,
                 RoundId = roundId,
@@ -123,7 +124,7 @@ namespace Mistaken.AntyTeamKillSystem
                 .Replace("{Victim}", this.Victim.ToString(false))
                 .Replace("{VictimTeam}", this.VictimTeam.ToString())
                 .Replace("{Tool}", this.Handler.Type.ToString())
-                .Replace("{Amount}", this.Handler.Amount.ToString())
+                .Replace("{Amount}", this.Handler.DealtHealthDamage.ToString()) // tu też nwm czy DealtHealthDamage czy Damage
                 .Replace("{DetectionCode}", this.DetectionCode)
                 ;
         }

@@ -44,7 +44,7 @@ namespace Mistaken.AntyTeamKillSystem.Commands
                         "TeamAttack",
                         $"Attacker: ({teamAttack.Attacker.Id}) {teamAttack.Attacker.Nickname} ({teamAttack.AttackerTeam})",
                         $"Attacker UserId: {teamAttack.Attacker.UserId}",
-                        $"Damage: {teamAttack.Handler.Amount}",
+                        $"Damage: {teamAttack.Handler.DealtHealthDamage}", // też nwm
                         $"Tool: {teamAttack.Handler.Type}",
                         $"Code: {teamAttack.DetectionCode}",
                         $"RoundsAgo: {RoundPlus.RoundId - teamAttack.RoundId}",
