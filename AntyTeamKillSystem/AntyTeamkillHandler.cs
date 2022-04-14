@@ -208,7 +208,7 @@ namespace Mistaken.AntyTeamKillSystem
             foreach (var target in targets)
             {
                 this.grenadeAttacks[target] = (thrower, throwerUserId, throwerTeam);
-                if (IsTeamKill(thrower, target, throwerTeam))
+                if (IsTeamKill(thrower, target, throwerTeam) || thrower == target)
                     friendlies.Add(target);
             }
 
@@ -237,7 +237,7 @@ namespace Mistaken.AntyTeamKillSystem
                 {
                     RLogger.Log("Anty TeamKill System", "MASS TK", $"Detected Mass TeamKill ({tks} players), Respawning ...");
                     if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.MassTKGlobalBroadcast))
-                        MapPlus.Broadcast("Anty TeamKill System", 5, PluginHandler.Instance.Translation.MassTKGlobalBroadcast.Replace("\\n", "\n").Replace("{TKCount}", tks.ToString()));
+                        MapPlus.Broadcast("Anty TeamKill System", 5, PluginHandler.Instance.Translation.MassTKGlobalBroadcast.Replace("\\n", "\n").Replace("{TKCount}", tks.ToString()).Replace("{Code}", "5.4"));
                     foreach (var player in friendlies)
                     {
                         if (!player.IsDead)
