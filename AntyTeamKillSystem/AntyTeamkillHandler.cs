@@ -75,20 +75,14 @@ namespace Mistaken.AntyTeamKillSystem
                     teamKill.Attacker.SendConsoleMessage(PluginHandler.Instance.Translation.TeamKillAttackerConsoleMessage.Replace("\\n", "\n").Replace("{VictimName}", teamKill.Victim.GetDisplayName()).Replace("{TeamKillInfo}", teamKill.ToString()), "red");
 
                 if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamKillAttackerBroadcast))
-                {
-                    teamKill.Attacker.ClearBroadcasts();
-                    teamKill.Attacker.Broadcast(5, PluginHandler.Instance.Translation.TeamKillAttackerBroadcast.Replace("\\n", "\n").Replace("{VictimName}", teamKill.Victim.GetDisplayName()));
-                }
+                    teamKill.Attacker.Broadcast(5, PluginHandler.Instance.Translation.TeamKillAttackerBroadcast.Replace("\\n", "\n").Replace("{VictimName}", teamKill.Victim.GetDisplayName()), shouldClearPrevious: true);
             }
 
             if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamKillVictimConsoleMessage))
                 teamKill.Victim.SendConsoleMessage(PluginHandler.Instance.Translation.TeamKillVictimConsoleMessage.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()).Replace("{TeamKillInfo}", teamKill.ToString()), "yellow");
 
             if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamKillVictimBroadcast))
-            {
-                teamKill.Victim.ClearBroadcasts();
-                teamKill.Victim.Broadcast(5, PluginHandler.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()));
-            }
+                teamKill.Victim.Broadcast(5, PluginHandler.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()), shouldClearPrevious: true);
 
             Instance.PunishPlayer(teamKill.Attacker, teamKill.Handler.Type == Exiled.API.Enums.DamageType.Explosion);
             PluginHandler.InvokeOnTeamKill(teamKill);
@@ -104,20 +98,14 @@ namespace Mistaken.AntyTeamKillSystem
                     teamAttack.Attacker.SendConsoleMessage(PluginHandler.Instance.Translation.TeamAttackAttackerConsoleMessage.Replace("\\n", "\n").Replace("{VictimName}", teamAttack.Victim.GetDisplayName()).Replace("{TeamAttackInfo}", teamAttack.ToString()), "yellow");
 
                 if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamAttackAttackerBroadcast))
-                {
-                    teamAttack.Attacker.ClearBroadcasts();
-                    teamAttack.Attacker.Broadcast(1, PluginHandler.Instance.Translation.TeamAttackAttackerBroadcast.Replace("\\n", "\n").Replace("{VictimName}", teamAttack.Victim.GetDisplayName()));
-                }
+                    teamAttack.Attacker.Broadcast(1, PluginHandler.Instance.Translation.TeamAttackAttackerBroadcast.Replace("\\n", "\n").Replace("{VictimName}", teamAttack.Victim.GetDisplayName()), shouldClearPrevious: true);
             }
 
             if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamAttackVictimConsoleMessage))
                 teamAttack.Victim.SendConsoleMessage(PluginHandler.Instance.Translation.TeamAttackVictimConsoleMessage.Replace("\\n", "\n").Replace("{AttackerName}", teamAttack.Attacker.GetDisplayName()).Replace("{TeamAttackInfo}", teamAttack.ToString()), "yellow");
 
             if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.TeamAttackVictimBroadcast))
-            {
-                teamAttack.Victim.ClearBroadcasts();
-                teamAttack.Victim.Broadcast(1, PluginHandler.Instance.Translation.TeamAttackVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamAttack.Attacker.GetDisplayName()));
-            }
+                teamAttack.Victim.Broadcast(1, PluginHandler.Instance.Translation.TeamAttackVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamAttack.Attacker.GetDisplayName()), shouldClearPrevious: true);
 
             PluginHandler.InvokeOnTeamAttack(teamAttack);
         }
