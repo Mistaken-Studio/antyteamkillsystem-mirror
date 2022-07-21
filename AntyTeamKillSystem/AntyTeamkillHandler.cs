@@ -226,7 +226,7 @@ namespace Mistaken.AntyTeamKillSystem
                     RLogger.Log("Anty TeamKill System", "MASS TK", $"Detected Mass TeamKill ({tks} players), Respawning ...");
                     if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.MassTKGlobalBroadcast))
                         MapPlus.Broadcast("Anty TeamKill System", 5, PluginHandler.Instance.Translation.MassTKGlobalBroadcast.Replace("\\n", "\n").Replace("{TKCount}", tks.ToString()).Replace("{Code}", "5.4"));
-                    foreach (var player in friendlies)
+                    foreach (var player in friendlies.Where(x => x != thrower))
                     {
                         if (!player.IsDead)
                         {
@@ -236,7 +236,7 @@ namespace Mistaken.AntyTeamKillSystem
 
                         if (!LastDead.TryGetValue(player, out var playerInfo))
                         {
-                            this.Log.Debug($"Error Code: 5.1 ({player.ToString(true)})", PluginHandler.Instance.Config.VerbouseOutput);
+                            this.Log.Warn($"Error Code: 5.1 ({player.ToString(true)})");
                             if (!string.IsNullOrWhiteSpace(PluginHandler.Instance.Translation.Error51ConsoleMessage))
                                 player.SendConsoleMessage(PluginHandler.Instance.Translation.Error51ConsoleMessage.Replace("\\n", "\n"), "red");
                             continue;
@@ -330,6 +330,12 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 1.0
             }
 
+            if (!LastDead.ContainsKey(ev.Target))
+            {
+                LastDead.Add(ev.Target, (ev.Target.Role.Team, ev.Target.Role));
+                this.CallDelayed(10, () => LastDead.Remove(ev.Target), "RemoveLastDead");
+            }
+
             if (ev.Killer == Server.Host)
             {
                 this.Log.Debug("Skip Code: 1.7", PluginHandler.Instance.Config.VerbouseOutput);
@@ -373,12 +379,6 @@ namespace Mistaken.AntyTeamKillSystem
                 // Not TeamKill
                 // SkipCode: 1.1
                 RLogger.Log("Anty TeamKill System", "SKIP TK", $"Death was not detected as TeamKill. Skip Code: 1.1");
-            }
-
-            if (!LastDead.ContainsKey(ev.Target))
-            {
-                LastDead.Add(ev.Target, (ev.Target.Role.Team, ev.Target.Role));
-                this.CallDelayed(10, () => LastDead.Remove(ev.Target), "RemoveLastDead");
             }
         }
 
