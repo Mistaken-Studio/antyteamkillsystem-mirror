@@ -34,7 +34,7 @@ namespace Mistaken.AntyTeamKillSystem
         public static AntyTeamkillHandler Instance { get; private set; }
 
         public static bool IsTeamKill(Player attacker, Player victim, Team? attackerTeam = null)
-            => attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Role.Team, victim.Role.Team);
+            => attacker != Server.Host && attacker != null && attacker != victim && IsTeamKill(attackerTeam ?? attacker.Role.Team, victim.Role.Team);
 
         public static bool IsTeamKill(Team attackerTeam, Team victimTeam)
             => TeamKillTeams.Any(x => x.Attacker == attackerTeam && x.Victim == victimTeam);
@@ -54,7 +54,9 @@ namespace Mistaken.AntyTeamKillSystem
             Exiled.Events.Handlers.Player.Hurting += this.Player_Hurting;
             Exiled.Events.Handlers.Map.ExplodingGrenade += this.Map_ExplodingGrenade;
             Exiled.Events.Handlers.Player.Destroying += this.Player_Destroying;
+            Exiled.Events.Handlers.Scp079.InteractingTesla += this.Scp079_InteractingTesla;
         }
+
 
         public override void OnDisable()
         {
@@ -63,6 +65,7 @@ namespace Mistaken.AntyTeamKillSystem
             Exiled.Events.Handlers.Player.Hurting -= this.Player_Hurting;
             Exiled.Events.Handlers.Map.ExplodingGrenade -= this.Map_ExplodingGrenade;
             Exiled.Events.Handlers.Player.Destroying -= this.Player_Destroying;
+            Exiled.Events.Handlers.Scp079.InteractingTesla -= this.Scp079_InteractingTesla;
         }
 
         internal static void OnTeamKill(TeamKill teamKill)
@@ -110,6 +113,7 @@ namespace Mistaken.AntyTeamKillSystem
             PluginHandler.InvokeOnTeamAttack(teamAttack);
         }
 
+        private readonly Dictionary<Exiled.API.Features.TeslaGate, Player> teslaTrigger = new Dictionary<Exiled.API.Features.TeslaGate, Player>();
         private readonly Dictionary<string, string> leftPlayersIPs = new Dictionary<string, string>();
         private readonly Dictionary<string, Player> leftPlayers = new Dictionary<string, Player>();
         private readonly Dictionary<Player, (Player Thrower, string ThrowerUserId, Team ThrowerTeam)> grenadeAttacks = new Dictionary<Player, (Player Thrower, string ThrowerUserId, Team ThrowerTeam)>();
@@ -129,6 +133,19 @@ namespace Mistaken.AntyTeamKillSystem
 
             this.leftPlayers[ev.Player.UserId] = ev.Player;
             this.leftPlayersIPs[ev.Player.UserId] = ev.Player.IPAddress;
+        }
+
+        private void Scp079_InteractingTesla(Exiled.Events.EventArgs.InteractingTeslaEventArgs ev)
+        {
+            if (ev.IsAllowed)
+            {
+                var tesla = ev.Tesla;
+                this.teslaTrigger[tesla] = ev.Player;
+                this.CallDelayed(
+                    1,
+                    () => this.teslaTrigger.Remove(tesla),
+                    "RemoveTeslaLate");
+            }
         }
 
         private void Server_RestartingRound()
@@ -270,11 +287,11 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 2.6
             }
 
-            if (ev.Attacker == Server.Host)
+            /*if (ev.Attacker == Server.Host)
             {
                 this.Log.Debug("Skip Code: 2.7", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // SkipCode: 2.7
-            }
+            }*/
 
             if (ev.Attacker is null)
             {
@@ -287,19 +304,21 @@ namespace Mistaken.AntyTeamKillSystem
                 // TeamAttack
                 // ExecuteCode: 2.2
                 TeamAttack.Create(ev, "2.2");
+                return;
             }
             else if (LastDead.TryGetValue(ev.Attacker, out var attackerInfo) && IsTeamKill(ev.Attacker, ev.Target, attackerInfo.Team))
             {
                 // TeamAttack but attacker already died
                 // ExecuteCode: 2.3
                 TeamAttack.Create(ev, "2.3", attackerInfo.Team);
+                return;
             }
             else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {
                     // ExecuteCode: 2.5
-                    TeamAttack.Create(ev, "2.5", attackerInfo.Team, grenadeAttacker.Thrower);
+                    TeamAttack.Create(ev, "2.5", grenadeAttacker.ThrowerTeam, grenadeAttacker.Thrower);
                 }
                 else
                 {
@@ -307,13 +326,35 @@ namespace Mistaken.AntyTeamKillSystem
                     // SkipCode: 2.4
                     RLogger.Log("Anty TeamKill System", "SKIP TA", $"Grenade Hurting was not detected as TeamAttack. Skip Code: 2.4");
                 }
+
+                return;
             }
-            else
+            else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Tesla)
             {
-                // Not TeamAttack
-                // SkipCode: 2.1
-                RLogger.Log("Anty TeamKill System", "SKIP TA", $"Hurting was not detected as TeamAttack. Skip Code: 2.1");
+                foreach (var item in this.teslaTrigger)
+                {
+                    if (item.Key.PlayerInHurtRange(ev.Target))
+                    {
+                        if (IsTeamKill(item.Value, ev.Target, item.Value.Role.Team))
+                        {
+                            // ExecuteCode: 2.9
+                            TeamAttack.Create(ev, "2.5", attackerInfo.Team, item.Value);
+                        }
+                        else
+                        {
+                            // Not TeamAttack
+                            // SkipCode: 2.10
+                            RLogger.Log("Anty TeamKill System", "SKIP TA", $"Tesla Hurting was not detected as TeamAttack. Skip Code: 2.10");
+                        }
+
+                        return;
+                    }
+                }
             }
+
+            // Not TeamAttack
+            // SkipCode: 2.1
+            RLogger.Log("Anty TeamKill System", "SKIP TA", $"Hurting was not detected as TeamAttack. Skip Code: 2.1");
         }
 
         private void Player_Dying(Exiled.Events.EventArgs.DyingEventArgs ev)
@@ -336,11 +377,11 @@ namespace Mistaken.AntyTeamKillSystem
                 this.CallDelayed(10, () => LastDead.Remove(ev.Target), "RemoveLastDead");
             }
 
-            if (ev.Killer == Server.Host)
+            /*if (ev.Killer == Server.Host)
             {
                 this.Log.Debug("Skip Code: 1.7", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // SkipCode: 1.7
-            }
+            }*/
 
             if (ev.Killer is null)
             {
@@ -353,19 +394,23 @@ namespace Mistaken.AntyTeamKillSystem
                 // TeamKill -> Punish Player
                 // ExecuteCode: 1.2
                 TeamKill.Create(ev, "1.2");
+
+                return;
             }
             else if (LastDead.TryGetValue(ev.Killer, out var attackerInfo) && IsTeamKill(ev.Killer, ev.Target, attackerInfo.Team))
             {
                 // TeamKill but killer already died -> Punish Player
                 // ExecuteCode: 1.3
                 TeamKill.Create(ev, "1.3", attackerInfo.Team);
+
+                return;
             }
             else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion && this.grenadeAttacks.TryGetValue(ev.Target, out var grenadeAttacker))
             {
                 if (IsTeamKill(grenadeAttacker.Thrower, ev.Target, grenadeAttacker.ThrowerTeam))
                 {
                     // ExecuteCode: 1.5
-                    TeamKill.Create(ev, "1.5", attackerInfo.Team, grenadeAttacker.Thrower);
+                    TeamKill.Create(ev, "1.5", grenadeAttacker.ThrowerTeam, grenadeAttacker.Thrower);
                 }
                 else
                 {
@@ -373,13 +418,35 @@ namespace Mistaken.AntyTeamKillSystem
                     // SkipCode: 1.4
                     RLogger.Log("Anty TeamKill System", "SKIP TK", $"Grenade Death was not detected as TeamKill. Skip Code: 1.4");
                 }
+
+                return;
             }
-            else
+            else if (ev.Handler.Type == Exiled.API.Enums.DamageType.Tesla)
             {
-                // Not TeamKill
-                // SkipCode: 1.1
-                RLogger.Log("Anty TeamKill System", "SKIP TK", $"Death was not detected as TeamKill. Skip Code: 1.1");
+                foreach (var item in this.teslaTrigger)
+                {
+                    if (item.Key.PlayerInHurtRange(ev.Target))
+                    {
+                        if (IsTeamKill(item.Value, ev.Target, item.Value.Role.Team))
+                        {
+                            // ExecuteCode: 1.9
+                            TeamKill.Create(ev, "1.9", attackerInfo.Team, item.Value);
+                        }
+                        else
+                        {
+                            // Not TeamAttack
+                            // SkipCode: 1.10
+                            RLogger.Log("Anty TeamKill System", "SKIP TK", $"Tesla kill was not detected as TeamKill. Skip Code: 1.10");
+                        }
+
+                        return;
+                    }
+                }
             }
+
+            // Not TeamKill
+            // SkipCode: 1.1
+            RLogger.Log("Anty TeamKill System", "SKIP TK", $"Death was not detected as TeamKill. Skip Code: 1.1");
         }
 
         private void PunishPlayer(Player player, bool grenade)
