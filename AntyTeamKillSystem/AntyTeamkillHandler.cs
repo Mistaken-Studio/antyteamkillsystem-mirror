@@ -195,6 +195,12 @@ namespace Mistaken.AntyTeamKillSystem
                     this.Log.Error(ex.StackTrace);
                 }
 
+                if (string.IsNullOrEmpty(throwerUserId))
+                {
+                    RLogger.Log("Anty TeamKill System", "SKIP GRENADE", $"Skip Code: 3.10 | Thrower userid was null");
+                    return; // Skip Code: 3.10
+                }
+
                 thrower = Player.Get(throwerUserId);
                 if (thrower == null)
                 {
