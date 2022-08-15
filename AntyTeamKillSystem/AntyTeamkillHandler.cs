@@ -57,7 +57,6 @@ namespace Mistaken.AntyTeamKillSystem
             Exiled.Events.Handlers.Scp079.InteractingTesla += this.Scp079_InteractingTesla;
         }
 
-
         public override void OnDisable()
         {
             Exiled.Events.Handlers.Server.RestartingRound -= this.Server_RestartingRound;
@@ -162,6 +161,33 @@ namespace Mistaken.AntyTeamKillSystem
             {
                 this.Log.Debug("Skip Code: 3.4", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // Skip Code: 3.4
+            }
+
+            if (ev.GrenadeType == Exiled.API.Enums.GrenadeType.Flashbang)
+            {
+                if (ev.Thrower == null)
+                    return;
+
+                string victims = string.Empty;
+                foreach (var victim in ev.TargetsToAffect.ToArray())
+                {
+                    if (IsTeamKill(ev.Thrower, victim))
+                    {
+                        if (!string.IsNullOrEmpty(PluginHandler.Instance.Translation.FlashedTeammateVictimBroadcast))
+                            victim.Broadcast(5, PluginHandler.Instance.Translation.FlashedTeammateVictimBroadcast.Replace("{AttackerName}", ev.Thrower.GetDisplayName()), shouldClearPrevious: true);
+                        if (!string.IsNullOrEmpty(PluginHandler.Instance.Translation.FlashedTeammateVictimConsoleMessage))
+                            victim.SendConsoleMessage(PluginHandler.Instance.Translation.FlashedTeammateVictimConsoleMessage.Replace("{AttackerName}", ev.Thrower.GetDisplayName()), "yellow");
+                        victims += $"{victim.GetDisplayName()}\n";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(victims))
+                {
+                    if (!string.IsNullOrEmpty(PluginHandler.Instance.Translation.FlashedTeammateAttackerBroadcast))
+                        ev.Thrower.Broadcast(5, PluginHandler.Instance.Translation.FlashedTeammateAttackerBroadcast, shouldClearPrevious: true);
+                    if (!string.IsNullOrEmpty(PluginHandler.Instance.Translation.FlashedTeammateAttackerConsoleMessage))
+                        ev.Thrower.SendConsoleMessage(PluginHandler.Instance.Translation.FlashedTeammateAttackerConsoleMessage.Replace("{VictimName}", victims), "yellow");
+                }
             }
 
             if (ev.GrenadeType != Exiled.API.Enums.GrenadeType.FragGrenade)

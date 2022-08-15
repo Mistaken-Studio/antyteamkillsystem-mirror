@@ -106,5 +106,29 @@ namespace Mistaken.AntyTeamKillSystem
         /// </summary>
         [Description("Console message sent to user when plugin can't find previous role (Set empty to disable)")]
         public string Error51ConsoleMessage { get; set; } = "[<b>Anty TeamKill System</b>] Failed to find role before death (Error Code: 5.1)";
+
+        /// <summary>
+        /// Gets or sets flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable).
+        /// </summary>
+        [Description("Flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
+        public string FlashedTeammateVictimBroadcast { get; set; } = "<color=yellow>You have <b>been</b> flashed by {AttackerName}</color>";
+
+        /// <summary>
+        /// Gets or sets flashed attacker broadcast displayed to user when the player flashed his teammates (Set empty to disable).
+        /// </summary>
+        [Description("Flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
+        public string FlashedTeammateAttackerBroadcast { get; set; } = "<color=yellow>You have <b>flashed</b> a teammate</color>";
+
+        /// <summary>
+        /// Gets or sets console message sent to flashed teammate Victim (Set empty to disable).
+        /// </summary>
+        [Description("Console message sent to flashed teammate Victim (Set empty to disable)")]
+        public string FlashedTeammateVictimConsoleMessage { get; set; } = "[<b>Anty TeamKill System</b>] You have <b>been</b> flashed by {AttackerName}";
+
+        /// <summary>
+        /// Gets or sets console message sent to flashed teammate Attacker (Set empty to disable).
+        /// </summary>
+        [Description("Console message sent to flashed teammate Attacker (Set empty to disable)")]
+        public string FlashedTeammateAttackerConsoleMessage { get; set; } = "[<b>Anty TeamKill System</b>] You have flashed a teammate: {VictimName}";
     }
 }
