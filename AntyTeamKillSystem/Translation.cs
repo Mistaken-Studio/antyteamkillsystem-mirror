@@ -110,14 +110,14 @@ namespace Mistaken.AntyTeamKillSystem
         /// <summary>
         /// Gets or sets flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable).
         /// </summary>
-        [Description("flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
-        public string FlashedTeammateVictimBroadcast { get; set; } = "<color=yellow>You have <b>been</b> Flashed by {AttackerName}</color>";
+        [Description("Flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
+        public string FlashedTeammateVictimBroadcast { get; set; } = "<color=yellow>You have <b>been</b> flashed by {AttackerName}</color>";
 
         /// <summary>
         /// Gets or sets flashed attacker broadcast displayed to user when the player flashed his teammates (Set empty to disable).
         /// </summary>
-        [Description("flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
-        public string FlashedTeammateAttackerBroadcast { get; set; } = "<color=yellow>You have <b>flashed</b> a teammate</color>\\n<color=red><b>This will not be tolerated</b></color>";
+        [Description("Flashed victim broadcast displayed to user when the player is flashed by his teammate (Set empty to disable)")]
+        public string FlashedTeammateAttackerBroadcast { get; set; } = "<color=yellow>You have <b>flashed</b> a teammate</color>";
 
         /// <summary>
         /// Gets or sets console message sent to flashed teammate Victim (Set empty to disable).
