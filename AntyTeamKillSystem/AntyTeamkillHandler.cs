@@ -4,6 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Exiled.API.Extensions;
@@ -498,7 +499,15 @@ namespace Mistaken.AntyTeamKillSystem
             this.delayedPunishPlayers.Add(player);
             MEC.Timing.CallDelayed(grenade ? 2 : 8, () =>
             {
-                var tks = TeamKill.TeamKills[RoundPlus.RoundId].Where(x => x.Attacker.UserId == player.UserId).Count();
+                int tks = 0;
+                foreach (var teamkill in TeamKill.TeamKills[RoundPlus.RoundId])
+                {
+                    if (teamkill.Attacker.UserId != player.UserId)
+                        continue;
+                    if (PluginHandler.Instance.Config.TeamkillPunishmentInvalidateTime != 0 && (DateTime.Now - teamkill.Timestamp).TotalSeconds > PluginHandler.Instance.Config.TeamkillPunishmentInvalidateTime)
+                        continue;
+                    tks++;
+                }
 
                 RLogger.Log("Anty TeamKill System", "PUNISH", $"Punishing {player.PlayerToString()} for TeamKilling {tks} players");
 
