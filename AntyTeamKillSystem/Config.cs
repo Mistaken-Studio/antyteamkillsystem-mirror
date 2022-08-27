@@ -30,6 +30,12 @@ namespace Mistaken.AntyTeamKillSystem
         };
 
         /// <summary>
+        /// Gets or sets time after which the teamkill is no longer counted when punishing the player.
+        /// </summary>
+        [Description("Time (in seconds) after which the teamkill is no longer counted when punishing the player. (Set to 0 to disable)")]
+        public int TeamkillPunishmentInvalidateTime { get; set; } = 180;
+
+        /// <summary>
         /// Gets or sets a value indicating whether debug should be displayed.
         /// </summary>
         [Description("If true then debug will be displayed")]
