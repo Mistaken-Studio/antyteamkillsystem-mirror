@@ -484,7 +484,7 @@ namespace Mistaken.AntyTeamKillSystem
 
         private void PunishPlayer(Player player, bool grenade)
         {
-            if (player.CheckPermission("ATKS.PunishBlock"))
+            if (Exiled.Permissions.Extensions.Permissions.CheckPermission(player, "ATKS.PunishBlock"))
             {
                 this.Log.Debug("Skip Code: 4.4", PluginHandler.Instance.Config.VerbouseOutput);
                 return; // Skip Code: 4.4
