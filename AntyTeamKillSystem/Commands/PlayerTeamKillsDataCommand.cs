@@ -1,31 +1,34 @@
-﻿// -----------------------------------------------------------------------
+﻿/*// -----------------------------------------------------------------------
 // <copyright file="PlayerTeamKillsDataCommand.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommandSystem;
-using Mistaken.API;
-using Mistaken.API.Commands;
+using PluginAPI.Commands;
+using PluginAPI.Core.Attributes;
+using PluginAPI.Enums;
 
 namespace Mistaken.AntyTeamKillSystem.Commands
 {
     [CommandSystem.CommandHandler(typeof(CommandSystem.RemoteAdminCommandHandler))]
-    internal class PlayerTeamKillsDataCommand : IBetterCommand, IPermissionLocked
+    internal class PlayerTeamKillsDataCommand : ICommand
     {
-        public string Permission => "ptkd";
+        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        {
+            throw new NotImplementedException();
+        }
 
-        public override string Description => "Return Player TK Data";
-
-        public string PluginName => PluginHandler.Instance.Name;
-
-        public override string Command => "playerTKData";
+        public string Command => "playerTKData";
 
         public override string[] Aliases => new string[] { "ptkd" };
 
-        public override string[] Execute(ICommandSender sender, string[] args, out bool s)
+        [PluginCommand("playerTKData", "", CommandType.RemoteAdmin)]
+        [PluginCommandAliases(new[] {"ptkd"})]
+        public string[] Execute(ICommandSender sender, string[] args, out bool s)
         {
             s = false;
             if (args.Length == 0)
@@ -80,3 +83,4 @@ namespace Mistaken.AntyTeamKillSystem.Commands
         }
     }
 }
+*/

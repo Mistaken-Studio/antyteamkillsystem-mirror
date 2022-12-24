@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+﻿/*// -----------------------------------------------------------------------
 // <copyright file="GetAttackerCommand.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
@@ -19,7 +19,7 @@ namespace Mistaken.AntyTeamKillSystem.Commands
 
         public override string Description => "Get Attacker";
 
-        public string PluginName => PluginHandler.Instance.Name;
+        public string PluginName => Plugin.Instance.Name;
 
         public override string Command => "getattacker";
 
@@ -79,3 +79,4 @@ namespace Mistaken.AntyTeamKillSystem.Commands
         }
     }
 }
+*/
