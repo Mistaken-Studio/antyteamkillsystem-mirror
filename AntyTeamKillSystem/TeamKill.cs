@@ -222,8 +222,8 @@ public static class PlayerExtensions
 
         return split[1] switch
         {
-            "steam" => $"[{player.Nickname}](https://steamcommunity.com/profiles/{split[0]}) ({player.UserId})",
-            "discord" => $"{player.Nickname} (<@{split[0]}>) ({player.UserId})",
+            "steam" => $"[{player.Nickname}](https://steamcommunity.com/profiles/{split[0]})",
+            "discord" => $"{player.Nickname} (<@{split[0]}>)",
             "server" => "Server",
             _ => player.UserId
         };

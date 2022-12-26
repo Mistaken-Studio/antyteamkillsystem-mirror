@@ -67,7 +67,7 @@ namespace Mistaken.AntyTeamKillSystem
             if (!string.IsNullOrWhiteSpace(Plugin.Instance.Translation.TeamKillVictimBroadcast))
                 teamKill.Victim.SendBroadcast(Plugin.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()), 5, shouldClearPrevious: true);
 
-            SendTeamKillWebhook(teamKill);
+            Task.Run(async () => await SendTeamKillWebhook(teamKill));
             Instance.PunishPlayer(teamKill.Attacker, teamKill.Handler is ExplosionDamageHandler);
             Plugin.InvokeOnTeamKill(teamKill);
         }
@@ -102,7 +102,7 @@ namespace Mistaken.AntyTeamKillSystem
 
         
 
-        private static async void SendTeamKillWebhook(TeamKill teamkill)
+        private static async Task SendTeamKillWebhook(TeamKill teamkill)
         {
             if (teamkill.Victim is null || teamkill.Attacker is null)
                 return;
@@ -119,7 +119,7 @@ namespace Mistaken.AntyTeamKillSystem
                         .WithField("Victim", teamkill.Victim.FormatUserId(), true)
                         .WithField("Attacker", teamkill.Attacker.FormatUserId(), true)
                         .WithField("Server", Server.Port == 7778 ? "#2 PL RP" : "#3 Non RP", true)
-                        .WithField("Victim Team", teamkill.VictimTeam.ToString())
+                        .WithField("Victim Team", teamkill.VictimTeam.ToString(), true)
                         .WithField("Attacker Team", teamkill.VictimTeam.ToString(), true)
                         .WithField("Tool", teamkill.Handler.ServerLogsText, true)
                         .WithColor(255, 0, 0)
