@@ -110,19 +110,22 @@ namespace Mistaken.AntyTeamKillSystem
             if (string.IsNullOrWhiteSpace(Plugin.Instance.Config.WebhookLink))
                 return;
 
-            var embed = new Embed()
-            .WithAuthor("Teamkill!")
-            .WithField("Victim", teamkill.Victim.FormatUserId(), true)
-            .WithField("Attacker", teamkill.Attacker.FormatUserId(), true)
-            .WithField("Server", Server.Port == 7778 ? "#2 PL RP" : "#3 Non RP", true)
-            .WithField("Victim Team", teamkill.VictimTeam.ToString())
-            .WithField("Attacker Team", teamkill.VictimTeam.ToString(), true)
-            .WithField("Tool", teamkill.Handler.ServerLogsText, true)
-            .WithColor(255, 0, 0)
-            .WithFooter($"{DateTime.Now:dd:MM:yyyy} • {DateTime.Now:HH:mm:ss}");
-
             await new Webhook(Plugin.Instance.Config.WebhookLink)
-                .AddMessage(msg => msg.Embeds.Add(embed)).Send();
+                .AddMessage(msg =>msg
+                .WithEmbed(embed =>
+                {
+                    embed
+                        .WithAuthor("Teamkill!")
+                        .WithField("Victim", teamkill.Victim.FormatUserId(), true)
+                        .WithField("Attacker", teamkill.Attacker.FormatUserId(), true)
+                        .WithField("Server", Server.Port == 7778 ? "#2 PL RP" : "#3 Non RP", true)
+                        .WithField("Victim Team", teamkill.VictimTeam.ToString())
+                        .WithField("Attacker Team", teamkill.VictimTeam.ToString(), true)
+                        .WithField("Tool", teamkill.Handler.ServerLogsText, true)
+                        .WithColor(255, 0, 0)
+                        .WithFooter($"{DateTime.Now:dd:MM:yyyy} • {DateTime.Now:HH:mm:ss}");
+                }
+                )).Send();
         }
 
         [UsedImplicitly]
