@@ -37,12 +37,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommandSystem.Core" HintPath="$(MISTAKEN_REFERENCES)\CommandSystem.Core.dll" />
-    <Reference Include="PluginAPI">
-      <HintPath>..\..\..\..\MistakenReferences\PluginAPI.dll</HintPath>
-    </Reference>
+	<Reference Include="PluginAPI" HintPath="$(MISTAKEN_REFERENCES)\PluginAPI.dll" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(MISTAKEN_REFERENCES)\UnityEngine.CoreModule.dll" />
     <Reference Include="Mirror" HintPath="$(MISTAKEN_REFERENCES)\Mirror.dll" />
     <Reference Include="NorthwoodLib" HintPath="$(MISTAKEN_REFERENCES)\NorthwoodLib.dll" />
+	<Reference Include="Discord_Webhook" HintPath="$(MISTAKEN_REFERENCES)\Discord_Webhook.dll" />
     <Reference Include="Assembly-CSharp-firstpass" HintPath="$(MISTAKEN_REFERENCES)\Assembly-CSharp-firstpass.dll" />
     <Reference Include="Assembly-CSharp-Publicized" HintPath="$(MISTAKEN_REFERENCES)\Assembly-CSharp-Publicized.dll" />
     <Reference Include="System" />

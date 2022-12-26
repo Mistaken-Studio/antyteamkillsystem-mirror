@@ -7,6 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Discord_Webhook;
+using JetBrains.Annotations;
 using MEC;
 using PlayerRoles;
 using PlayerStatsSystem;
@@ -17,7 +20,7 @@ using PluginAPI.Events;
 
 namespace Mistaken.AntyTeamKillSystem
 {
-    internal class AntyTeamkillHandler
+    internal sealed class AntyTeamkillHandler
     {
         public static readonly (Team Attacker, Team Victim)[] TeamKillTeams = {
             (Team.ChaosInsurgency, Team.ChaosInsurgency),
@@ -65,6 +68,7 @@ namespace Mistaken.AntyTeamKillSystem
                 teamKill.Victim.SendBroadcast(Plugin.Instance.Translation.TeamKillVictimBroadcast.Replace("\\n", "\n").Replace("{AttackerName}", teamKill.Attacker.GetDisplayName()), 5, shouldClearPrevious: true);
 
             Instance.PunishPlayer(teamKill.Attacker, teamKill.Handler is ExplosionDamageHandler);
+            Task.Run(async () => await SendTeamKillWebhook(teamKill));
             Plugin.InvokeOnTeamKill(teamKill);
         }
 
@@ -96,6 +100,32 @@ namespace Mistaken.AntyTeamKillSystem
         private readonly Dictionary<Player, (Player Thrower, string ThrowerUserId, Team ThrowerTeam)> grenadeAttacks = new();
         private readonly HashSet<Player> delayedPunishPlayers = new();
 
+        
+
+        private static async Task SendTeamKillWebhook(TeamKill teamkill)
+        {
+            if (teamkill.Victim is null || teamkill.Attacker is null)
+                return;
+
+            if (string.IsNullOrWhiteSpace(Plugin.Instance.Config.WebhookLink))
+                return;
+
+            var embed = new Embed()
+            .WithAuthor("Teamkill!")
+            .WithField("Victim", teamkill.Victim.FormatUserId(), true)
+            .WithField("Attacker", teamkill.Attacker.FormatUserId(), true)
+            .WithField("Server", Server.Port == 7778 ? "#2 PL RP" : "#3 Non RP", true)
+            .WithField("Victim Team", teamkill.VictimTeam.ToString())
+            .WithField("Attacker Team", teamkill.VictimTeam.ToString(), true)
+            .WithField("Tool", teamkill.Handler.ServerLogsText, true)
+            .WithColor(255, 0, 0)
+            .WithFooter($"{DateTime.Now:dd:MM:yyyy} • {DateTime.Now:HH:mm:ss}");
+
+            await new Webhook(Plugin.Instance.Config.WebhookLink)
+                .AddMessage(msg => msg.Embeds.Add(embed)).Send();
+        }
+
+        [UsedImplicitly]
         [PluginEvent(ServerEventType.PlayerLeft)]
         private void Player_Destroying(Player player)
         {
@@ -127,6 +157,8 @@ namespace Mistaken.AntyTeamKillSystem
         }*/
 
         internal static int RoundIdCounter;
+
+        [UsedImplicitly]
         [PluginEvent(ServerEventType.RoundRestart)]
         private void Server_RestartingRound()
         {
@@ -282,6 +314,7 @@ namespace Mistaken.AntyTeamKillSystem
             });
         }*/
 
+        [UsedImplicitly]
         [PluginEvent(ServerEventType.PlayerDamage)]
         private void Player_Hurting(Player attacker, Player victim, DamageHandlerBase handler)
         {
@@ -297,9 +330,15 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 2.0
             }*/
 
+            if (victim == null)
+            {
+                Log.Debug("Skip Code: 2.4 (Not Legacy)", Plugin.Instance.Config.VerboseOutput);
+                return; // SkipCode: 2.4
+            }
+
             if (victim.IsGodModeEnabled)
             {
-                Log.Debug("Skip Code: 2.6", Plugin.Instance.Config.VerbouseOutput);
+                Log.Debug("Skip Code: 2.6", Plugin.Instance.Config.VerboseOutput);
                 return; // SkipCode: 2.6
             }
 
@@ -311,7 +350,7 @@ namespace Mistaken.AntyTeamKillSystem
 
             if (attacker is null)
             {
-                Log.Debug("Skip Code: 2.8", Plugin.Instance.Config.VerbouseOutput);
+                Log.Debug("Skip Code: 2.8", Plugin.Instance.Config.VerboseOutput);
                 return; // SkipCode: 2.8
             }
 
@@ -373,6 +412,7 @@ namespace Mistaken.AntyTeamKillSystem
             // RLogger.Log("Anty TeamKill System", "SKIP TA", $"Hurting was not detected as TeamAttack. Skip Code: 2.1");
         }
 
+        [UsedImplicitly]
         [PluginEvent(ServerEventType.PlayerDeath)]
         private void Player_Dying(Player attacker, Player victim, DamageHandlerBase handler)
         {
@@ -388,6 +428,12 @@ namespace Mistaken.AntyTeamKillSystem
                 return; // SkipCode: 1.0
             }*/
 
+            if (victim == null)
+            {
+                Log.Debug("Skip Code: 1.4 (Not Legacy)", Plugin.Instance.Config.VerboseOutput);
+                return; // SkipCode: 1.4
+            }
+
             if (!LastDead.ContainsKey(victim))
             {
                 LastDead.Add(victim, (victim.Role.GetTeam(), victim.Role));
@@ -402,7 +448,7 @@ namespace Mistaken.AntyTeamKillSystem
 
             if (attacker is null)
             {
-                Log.Debug("Skip Code: 1.8", Plugin.Instance.Config.VerbouseOutput);
+                Log.Debug("Skip Code: 1.8", Plugin.Instance.Config.VerboseOutput);
                 return; // SkipCode: 1.8
             }
 
@@ -476,7 +522,7 @@ namespace Mistaken.AntyTeamKillSystem
 
             if (delayedPunishPlayers.Contains(player))
             {
-                Log.Debug("Skip Code: 4.0", Plugin.Instance.Config.VerbouseOutput);
+                Log.Debug("Skip Code: 4.0", Plugin.Instance.Config.VerboseOutput);
                 return; // Skip Code: 4.0
             }
 
@@ -495,8 +541,7 @@ namespace Mistaken.AntyTeamKillSystem
 
                 // RLogger.Log("Anty TeamKill System", "PUNISH", $"Punishing {player.PlayerToString()} for TeamKilling {tks} players");
 
-                object[] rawBanInfo = null;
-                if (!Plugin.Instance.Config.BanLevels.TryGetValue(tks, out rawBanInfo))
+                if (!Plugin.Instance.Config.BanLevels.TryGetValue(tks, out object[] rawBanInfo))
                 {
                     for (var i = tks; i > 0; i--)
                     {
@@ -559,12 +604,12 @@ namespace Mistaken.AntyTeamKillSystem
                 if (nickname.Length > maxLength)
                     nickname = nickname.Substring(0, maxLength);
 
-                Log.Debug("Status Code: 4.2", Plugin.Instance.Config.VerbouseOutput);
+                Log.Debug("Status Code: 4.2", Plugin.Instance.Config.VerboseOutput);
                 Log.Info($"Player ({nickname}) left before ban, banning offline");
                 
                 if (!EventManager.ExecuteEvent<bool>(ServerEventType.PlayerBanned, player, Server.Instance, message, duration))
                 {
-                    Log.Debug("Skip Code: 4.1", Plugin.Instance.Config.VerbouseOutput);
+                    Log.Debug("Skip Code: 4.1", Plugin.Instance.Config.VerboseOutput);
                     return; // Skip Code: 4.1
                 }
 

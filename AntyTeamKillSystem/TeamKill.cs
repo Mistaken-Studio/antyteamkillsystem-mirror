@@ -124,7 +124,7 @@ public struct TeamKill
                 .Replace("{Victim}", this.Victim.ToString(false))
                 .Replace("{VictimTeam}", this.VictimTeam.ToString())
                 .Replace("{Tool}", this.Handler.ServerLogsText)
-                .Replace("{Amount}", this.Handler.DealtHealthDamage.ToString()) // tu też nwm czy DealtHealthDamage czy Damage
+                .Replace("{Amount}", this.Handler.Damage.ToString())
                 .Replace("{DetectionCode}", this.DetectionCode)
             ;
     }
@@ -212,4 +212,20 @@ public static class PlayerExtensions
     /// <returns>Name.</returns>
     public static string GetDisplayName(this Player player)
         => player == null ? "NULL" : player.DisplayNickname ?? player.Nickname;
+
+    public static string FormatUserId(this Player player)
+    {
+        if (player is null)
+            return "NONE";
+
+        var split = player.UserId.Split('@');
+
+        return split[1] switch
+        {
+            "steam" => $"[{player.Nickname}](https://steamcommunity.com/profiles/{split[0]}) ({player.UserId})",
+            "discord" => $"{player.Nickname} (<@{split[0]}>) ({player.UserId})",
+            "server" => "Server",
+            _ => player.UserId
+        };
+    }
 }

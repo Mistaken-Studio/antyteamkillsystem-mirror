@@ -9,7 +9,7 @@ using System.ComponentModel;
 namespace Mistaken.AntyTeamKillSystem;
 
 /// <inheritdoc/>
-public class Config
+public sealed class Config
 {
     /// <summary>
     /// Gets or sets dictionary containing bans for specific TeamKill counts.
@@ -35,5 +35,7 @@ public class Config
     /// Gets or sets a value indicating whether debug should be displayed.
     /// </summary>
     [Description("If true then debug will be displayed")]
-    public bool VerbouseOutput { get; set; }
+    public bool VerboseOutput { get; set; }
+
+    public string WebhookLink { get; set; }
 }

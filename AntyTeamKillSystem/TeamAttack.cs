@@ -142,7 +142,7 @@ public struct TeamAttack
                 .Replace("{Tool}", this.Handler.ServerLogsText)
                 .Replace(
                     "{Amount}",
-                    this.Handler.DealtHealthDamage.ToString()) // nwm czy tu ma być DealtHealthDamage czy Damage
+                    this.Handler.Damage.ToString())
                 .Replace("{DetectionCode}", this.DetectionCode)
             ;
     }
